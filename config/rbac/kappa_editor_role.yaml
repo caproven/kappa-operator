@@ -1,0 +1,24 @@
+# permissions for end users to edit kappas.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kappa-editor-role
+rules:
+- apiGroups:
+  - caproven.info
+  resources:
+  - kappas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - caproven.info
+  resources:
+  - kappas/status
+  verbs:
+  - get

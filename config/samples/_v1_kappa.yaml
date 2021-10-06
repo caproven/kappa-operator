@@ -1,0 +1,7 @@
+apiVersion: caproven.info/v1
+kind: Kappa
+metadata:
+  name: kappa-sample
+spec:
+  # Add fields here
+  foo: bar
