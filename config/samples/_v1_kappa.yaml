@@ -4,4 +4,4 @@ metadata:
   name: kappa-sample
 spec:
   # Add fields here
-  foo: bar
+  hasCucumber: true

@@ -47,12 +47,17 @@ type KappaReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
 func (r *KappaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	kappaLog := log.FromContext(ctx)
 
-	// your logic here
+	kappaLog.Info("Reconciling Kappa")
 
-	mylog := log.Log.WithName("kappa-controller")
-	mylog.Info("Reconciling Kappa")
+	kappa := &caproveninfov1.Kappa{}
+	err := r.Get(ctx, req.NamespacedName, kappa)
+	if err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	kappaLog.Info("Status", "hasCucumber", kappa.Spec.HasCucumber)
 
 	return ctrl.Result{}, nil
 }

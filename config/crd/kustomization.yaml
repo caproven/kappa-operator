@@ -1,0 +1,3 @@
+# TODO should we need to explicitly add this?
+resources:
+  - bases/caproven.info_kappas.yaml

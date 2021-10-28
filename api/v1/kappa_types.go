@@ -28,8 +28,8 @@ type KappaSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Kappa. Edit kappa_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// HasCucumber indicates whether or not the kappa has a cucumber
+	HasCucumber bool `json:"hasCucumber,omitempty"`
 }
 
 // KappaStatus defines the observed state of Kappa
