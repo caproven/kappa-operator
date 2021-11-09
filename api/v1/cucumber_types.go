@@ -23,42 +23,42 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KappaSpec defines the desired state of Kappa
-type KappaSpec struct {
+// CucumberSpec defines the desired state of Cucumber
+type CucumberSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Foo is an example field of Cucumber. Edit cucumber_types.go to remove/update
+	Foo string `json:"foo,omitempty"`
 }
 
-// KappaStatus defines the observed state of Kappa
-type KappaStatus struct {
+// CucumberStatus defines the observed state of Cucumber
+type CucumberStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// HasCucumber indicates whether or not the kappa has a cucumber
-	HasCucumber bool `json:"hasCucumber,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
-// Kappa is the Schema for the kappas API
-type Kappa struct {
+// Cucumber is the Schema for the cucumbers API
+type Cucumber struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   KappaSpec   `json:"spec,omitempty"`
-	Status KappaStatus `json:"status,omitempty"`
+	Spec   CucumberSpec   `json:"spec,omitempty"`
+	Status CucumberStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// KappaList contains a list of Kappa
-type KappaList struct {
+// CucumberList contains a list of Cucumber
+type CucumberList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Kappa `json:"items"`
+	Items           []Cucumber `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Kappa{}, &KappaList{})
+	SchemeBuilder.Register(&Cucumber{}, &CucumberList{})
 }

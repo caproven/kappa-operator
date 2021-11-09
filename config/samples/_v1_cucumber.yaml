@@ -1,6 +1,7 @@
 apiVersion: caproven.info/v1
-kind: Kappa
+kind: Cucumber
 metadata:
-  name: kappa-sample
+  name: cucumber-sample
 spec:
   # Add fields here
+  foo: bar

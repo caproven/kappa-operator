@@ -9,6 +9,32 @@ rules:
 - apiGroups:
   - caproven.info
   resources:
+  - cucumbers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - caproven.info
+  resources:
+  - cucumbers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - caproven.info
+  resources:
+  - cucumbers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - caproven.info
+  resources:
   - kappas
   verbs:
   - create

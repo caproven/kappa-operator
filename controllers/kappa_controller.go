@@ -18,7 +18,12 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,10 +44,6 @@ type KappaReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Kappa object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
@@ -51,20 +52,112 @@ func (r *KappaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	kappaLog.Info("Reconciling Kappa")
 
+	// Fetch the Kappa instance
 	kappa := &caproveninfov1.Kappa{}
 	err := r.Get(ctx, req.NamespacedName, kappa)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	kappaLog.Info("Status", "hasCucumber", kappa.Spec.HasCucumber)
+	// Return if the object is being deleted
+	if kappa.GetDeletionTimestamp() != nil {
+		return ctrl.Result{}, nil
+	}
+
+	if err := r.reconcileStatus(ctx, kappa); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err = r.reconcileConfigMap(ctx, kappa); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err = r.reconcileSecret(ctx, kappa); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *KappaReconciler) reconcileStatus(ctx context.Context, kappa *caproveninfov1.Kappa) error {
+	kappa.Status.HasCucumber = true
+	return r.Status().Update(ctx, kappa)
+}
+
+func (r *KappaReconciler) reconcileConfigMap(ctx context.Context, kappa *caproveninfov1.Kappa) error {
+	kappaLog := log.FromContext(ctx).WithName("reconcileConfigMap")
+
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      strings.Join([]string{kappa.Name, "config"}, "-"),
+			Namespace: kappa.Namespace,
+		},
+		Data: map[string]string{
+			"hello": SayHello(kappa.Name),
+		},
+	}
+	ctrl.SetControllerReference(kappa, cm, r.Scheme)
+
+	if err := r.Create(ctx, cm); err != nil {
+		if errors.IsAlreadyExists(err) {
+			return nil
+		}
+		return err
+	} else {
+		kappaLog.Info("Created ConfigMap")
+	}
+
+	return nil
+}
+
+func (r *KappaReconciler) reconcileSecret(ctx context.Context, kappa *caproveninfov1.Kappa) error {
+	kappaLog := log.FromContext(ctx).WithName("reconcileSecret")
+
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      strings.Join([]string{kappa.Name, "secret"}, "-"),
+			Namespace: kappa.Namespace,
+		},
+		Data: map[string][]byte{
+			"hello": []byte(SayHello(kappa.Name)),
+		},
+	}
+	ctrl.SetControllerReference(kappa, secret, r.Scheme)
+
+	if err := r.Create(ctx, secret); err != nil {
+		if errors.IsAlreadyExists(err) {
+			return nil
+		}
+		return err
+	} else {
+		kappaLog.Info("Created Secret")
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *KappaReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&caproveninfov1.Kappa{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Secret{}).
 		Complete(r)
+}
+
+func SayHello(name string) string {
+	if name == "" {
+		return "Hello!"
+	}
+	return fmt.Sprintf("Hello, %s", name)
+}
+
+func IsOwnedBy(obj, owner client.Object) bool {
+	ownerRefs := obj.GetOwnerReferences()
+	for _, ownerRef := range ownerRefs {
+		if ownerRef.UID == owner.GetUID() {
+			return true
+		}
+	}
+	return false
 }

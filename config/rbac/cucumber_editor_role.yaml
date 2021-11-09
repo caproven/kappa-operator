@@ -1,0 +1,24 @@
+# permissions for end users to edit cucumbers.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cucumber-editor-role
+rules:
+- apiGroups:
+  - caproven.info
+  resources:
+  - cucumbers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - caproven.info
+  resources:
+  - cucumbers/status
+  verbs:
+  - get
