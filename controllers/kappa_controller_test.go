@@ -2,7 +2,20 @@ package controllers
 
 import (
 	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+var _ = Describe("KappaController", func() {
+	// kappa := &caproveninfov1.Kappa{}
+
+	Describe("idk", func() {
+		It("should say hello", func() {
+			Expect(SayHello("Kappa")).To(Equal("Hello, Kappa"))
+		})
+	})
+})
 
 func TestKappaController(t *testing.T) {
 }

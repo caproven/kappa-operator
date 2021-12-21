@@ -41,6 +41,7 @@ type KappaReconciler struct {
 //+kubebuilder:rbac:groups=caproven.info,resources=kappas,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=caproven.info,resources=kappas/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=caproven.info,resources=kappas/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=configmaps;secrets,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -97,16 +98,27 @@ func (r *KappaReconciler) reconcileConfigMap(ctx context.Context, kappa *caprove
 		},
 	}
 	ctrl.SetControllerReference(kappa, cm, r.Scheme)
+	// cm.SetFinalizers([]string{"caproven.info/kappa-operator"})
 
-	if err := r.Create(ctx, cm); err != nil {
-		if errors.IsAlreadyExists(err) {
+	err := r.Get(ctx, client.ObjectKey{Name: cm.Name, Namespace: cm.Namespace}, cm)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// create
+			err = r.Create(ctx, cm)
+			if err != nil {
+				return err
+			}
+			kappaLog.Info("Created ConfigMap")
 			return nil
 		}
 		return err
-	} else {
-		kappaLog.Info("Created ConfigMap")
 	}
-
+	// update
+	err = r.Update(ctx, cm)
+	if err != nil {
+		return err
+	}
+	kappaLog.Info("Updated ConfigMap")
 	return nil
 }
 
